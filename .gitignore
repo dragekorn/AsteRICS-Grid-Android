@@ -1,0 +1,61 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build outputs
+dist/
+build/
+*.apk
+*.aab
+*.ipa
+
+# Android
+android/app/build/
+android/app/release/
+android/build/
+android/.gradle/
+android/local.properties
+android/.cxx/
+android/captures/
+*.jks
+*.keystore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+google-services.json
+GoogleService-Info.plist
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Temporary
+*.tmp
+*.temp
+.cache/
+
+# Capacitor
+android/.idea/
+android/capacitor-cordova-android-plugins/build/
+ios/App/Pods/
+ios/App/build/
+
+# Audio files (если не нужны в репо)
+*.wav
+*.mp3
