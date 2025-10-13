@@ -22,8 +22,13 @@ export class ServerTTSService extends TTSService {
     performanceMonitor.mark('server-tts-init-start');
 
     try {
-      // Проверяем доступность сервера
-      const health = await nlpClient.healthCheck();
+      // Проверяем доступность сервера с коротким таймаутом
+      const healthPromise = nlpClient.healthCheck();
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Health check timeout')), 3000);
+      });
+      
+      const health = await Promise.race([healthPromise, timeoutPromise]);
       
       this.serverAvailable = health.status === 'ok';
       this.isInitialized = true;

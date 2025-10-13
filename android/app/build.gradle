@@ -1,14 +1,20 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
 
 android {
     namespace "com.asterics.grid"
     compileSdk rootProject.ext.compileSdkVersion
+    
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId "com.asterics.grid"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 1009
+        versionName "1.0.1009-FINAL"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -30,8 +36,42 @@ repositories {
     }
 }
 
+// Task to patch index.html with debug logging BEFORE building
+tasks.whenTaskAdded { task ->
+    if (task.name == 'preBuild') {
+        task.doFirst {
+            def indexHtml = file('src/main/assets/index.html')
+            if (indexHtml.exists()) {
+                def content = indexHtml.text
+                // Add debug logging if not already present
+                if (!content.contains('debugLog')) {
+                    content = content.replace('</head>', '''  <script>
+    window.debugLog = function(m) {
+      var d = document.getElementById('xlog');
+      if (!d) {
+        d = document.createElement('div');
+        d.id = 'xlog';
+        d.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#0f0;font:18px monospace;padding:20px;overflow:auto;z-index:9999999;';
+        document.body.insertBefore(d, document.body.firstChild);
+      }
+      d.textContent += new Date().toLocaleTimeString() + ' ' + m + '\\n';
+    };
+    window.addEventListener('error', function(e) { debugLog('ERR:' + e.message); });
+    debugLog('START');
+  </script>
+</head>''')
+                    content = content.replace('<body onload="window.loaded = true;">', '<body onload="debugLog(\'BODY\'); window.loaded = true;">')
+                    indexHtml.text = content
+                    println "✅ Patched index.html with debug logging"
+                }
+            }
+        }
+    }
+}
+
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"

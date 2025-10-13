@@ -56,9 +56,9 @@ export default defineConfig(({ mode }) => {
       terserOptions: isProduction
         ? {
             compress: {
-              drop_console: true, // Remove console.log in production
+              drop_console: false, // ОСТАВЛЯЕМ console.log для дебага!
               drop_debugger: true,
-              pure_funcs: ['console.log', 'console.debug'], // Remove specific calls
+              pure_funcs: [], // НЕ удаляем console методы
               passes: 2, // Multiple passes for better compression
             },
             mangle: {
@@ -72,6 +72,8 @@ export default defineConfig(({ mode }) => {
 
       // Chunk optimization for code splitting
       rollupOptions: {
+        // Entry point - наш test-tts приложение  
+        input: resolve(__dirname, 'index.html'),
         output: {
           // Manual chunk splitting for optimal caching
           manualChunks: {

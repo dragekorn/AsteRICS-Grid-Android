@@ -34,13 +34,14 @@ export interface ISentenceResult {
 /**
  * Клиент для AAC NLP сервера.
  */
+
 export class NLPClient {
   private static instance: NLPClient | null = null;
 
   private readonly config: INLPConfig = {
-    serverUrl: 'http://localhost:5000',  // Поменяешь на реальный IP
-    timeout: 10000,
-    retryAttempts: 3,
+    serverUrl: 'http://192.168.0.104:5000',  // Твой IP с сервером TTS
+    timeout: 5000,  // Уменьшил таймаут для быстрой обработки ошибок
+    retryAttempts: 1,  // Меньше retry - быстрее fallback на mock
   };
 
   private constructor() {

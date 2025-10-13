@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEBUG AsTeRICS Grid</title>
+<script src="capacitor.js"></script>
+<script>
+window.ASTERICS_GRID_ANDROID = true;
+// window.SERVER_TTS_URL = 'http://192.168.0.104:5000/'; // ОТКЛЮЧЕНО - СЕРВЕР НЕДОСТУПЕН
+window.debugLog = function(m) {
+  var d = document.getElementById('xlog');
+  if (!d) {
+    d = document.createElement('div');
+    d.id = 'xlog';
+    d.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#0f0;font:bold 20px monospace;padding:30px;overflow:auto;z-index:99999999;word-wrap:break-word;';
+    document.body.appendChild(d);
+  }
+  var t = new Date().toLocaleTimeString();
+  d.innerHTML += '<div>' + t + ' - ' + m + '</div>';
+  console.log(t, m);
+};
+window.addEventListener('error', function(e) {
+  debugLog('❌ ERROR: ' + e.message + ' at ' + e.filename + ':' + e.lineno);
+});
+window.addEventListener('unhandledrejection', function(e) {
+  debugLog('❌ PROMISE: ' + String(e.reason));
+});
+debugLog('🚀 APP STARTING');
+debugLog('📡 TTS: ' + window.SERVER_TTS_URL);
+</script>
+</head>
+<body onload="debugLog('✅ BODY LOADED')">
+<script>debugLog('📄 Loading scripts...');</script>
+<script src="lib/jquery.min.js" onload="debugLog('✅ jQuery')" onerror="debugLog('❌ jQuery FAILED')"></script>
+<script src="lib/pouchdb-8.0.1.min.js" onload="debugLog('✅ PouchDB')" onerror="debugLog('❌ PouchDB FAILED')"></script>
+<script>debugLog('📦 Loading AsTeRICS Grid...');</script>
+<script type="module" src="js/asterics-grid.bundle.js" onload="debugLog('✅ AsTeRICS Grid LOADED')" onerror="debugLog('❌ AsTeRICS Grid FAILED')"></script>
+<script>debugLog('⏳ Waiting for Vue...');</script>
+<div id="app">
+  <div style="padding:20px;margin-top:400px;color:#fff;text-align:center;font:18px sans-serif;">
+    <p>If you see this, Vue is not mounting...</p>
+  </div>
+</div>
+</body>
+</html>

@@ -32,21 +32,26 @@ const ASTERICS_GRID_PATH =
 
 // Files and directories to copy
 const COPY_PATTERNS = [
-  // Core JavaScript files
+  // JavaScript bundles
   { from: 'app/build/*.js', to: 'js/' },
-  { from: 'app/build/*.js.map', to: 'js/' },
+  { from: 'app/build/*.js.map', to: 'js/', optional: true },
   
-  // CSS files
+  // CSS
   { from: 'app/build/*.css', to: 'css/' },
+  { from: 'app/css/**/*', to: 'css/' },  // ← ДОБАВЬ
+  
+  // Libraries (jQuery, PouchDB, etc)
+  { from: 'app/lib/**/*', to: 'lib/' },  // ← ДОБАВЬ
   
   // Assets
   { from: 'app/img/**/*', to: 'img/' },
   { from: 'app/dictionaries/**/*', to: 'dictionaries/' },
+  { from: 'app/manifest.webmanifest', to: 'manifest.webmanifest', optional: true },  // ← ДОБАВЬ
   
-  // HTML template (will be modified)
-  { from: 'app/index.html', to: 'index.html' },
+  // HTML из КОРНЯ
+  { from: 'index.html', to: 'index.html' },
   
-  // Service worker (optional)
+  // Service worker
   { from: 'app/sw.js', to: 'sw.js', optional: true },
 ];
 
@@ -124,7 +129,7 @@ async function copyFile(src, dest) {
  */
 async function copyDirectory(src, dest) {
   await ensureDir(dest);
-  
+
   const entries = await fs.readdir(src, { withFileTypes: true });
   let fileCount = 0;
 
@@ -153,26 +158,20 @@ async function processIndexHtml(htmlPath) {
   let html = await fs.readFile(htmlPath, 'utf-8');
 
   // Inject Capacitor script
-  const capacitorScript = '<script src="capacitor.js"></script>';
-  html = html.replace('</head>', `  ${capacitorScript}\n</head>`);
+  html = html.replace('</head>', `  <script src="capacitor.js"></script>\n</head>`);
 
-  // Inject our custom initialization script
-  const initScript = `
+  // Inject ServerTTS config
+  const serverConfig = `
   <script>
-    // AsTeRICS-Grid Android initialization
     window.ASTERICS_GRID_ANDROID = true;
-    window.OFFLINE_MODE = true;
-    
-    // Performance monitoring
-    if (window.performance && window.performance.mark) {
-      window.performance.mark('app-init-start');
-    }
+    window.SERVER_TTS_URL = 'http://192.168.0.104:5000/';
   </script>`;
-  html = html.replace('</body>', `  ${initScript}\n</body>`);
+  html = html.replace('</head>', `${serverConfig}\n</head>`);
 
-  // Update paths if needed
-  html = html.replace(/src="\/app\//g, 'src="');
-  html = html.replace(/href="\/app\//g, 'href="');
+  // Убираем все "app/" из путей (они скопированы в корень dist/)
+  html = html.replace(/href="app\//g, 'href="');
+  html = html.replace(/src="app\//g, 'src="');
+  html = html.replace(/src='app\//g, "src='");
 
   await fs.writeFile(htmlPath, html, 'utf-8');
 }
@@ -215,7 +214,7 @@ async function copyAstericsGrid() {
         // Recursive copy
         const basePath = pattern.from.split('**')[0];
         const srcDir = path.join(ASTERICS_GRID_PATH, basePath);
-        
+
         if (await exists(srcDir)) {
           const count = await copyDirectory(srcDir, destPath);
           totalFiles += count;
@@ -227,13 +226,13 @@ async function copyAstericsGrid() {
         // Glob pattern
         const dirPath = path.dirname(srcPath);
         const pattern = path.basename(srcPath);
-        
+
         if (await exists(dirPath)) {
           const files = await fs.readdir(dirPath);
           const regex = new RegExp(
             '^' + pattern.replace(/\*/g, '.*').replace(/\?/g, '.') + '$'
           );
-          
+
           let count = 0;
           for (const file of files) {
             if (regex.test(file)) {
@@ -244,7 +243,7 @@ async function copyAstericsGrid() {
               count++;
             }
           }
-          
+
           totalFiles += count;
           if (count > 0) {
             log(`  ✓ Copied ${count} files matching ${pattern}`, colors.green);

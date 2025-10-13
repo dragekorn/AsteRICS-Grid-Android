@@ -18,9 +18,9 @@ const config: CapacitorConfig = {
   server: {
     // Allow loading local files for offline operation
     androidScheme: 'https',
-    hostname: 'asterics-grid',
-    // Clear text traffic for development only
-    cleartext: false,
+    hostname: 'localhost',
+    // Clear text traffic enabled для HTTP подключения к TTS серверу
+    cleartext: true,
     // Allow mixed content for AsTeRICS-Grid compatibility
     allowNavigation: ['*'],
   },
@@ -76,11 +76,11 @@ const config: CapacitorConfig = {
       resizeOnFullScreen: true,
     },
 
-    // SplashScreen configuration
+    // SplashScreen configuration - ОТКЛЮЧЕН ДЛЯ ДЕБАГА!
     SplashScreen: {
-      launchAutoHide: false, // Manual control for asset loading
-      showSpinner: true,
-      spinnerColor: '#2196f3',
+      launchAutoHide: true, // СКРЫТЬ СРАЗУ!
+      launchDuration: 0, // БЕЗ ЗАДЕРЖКИ!
+      showSpinner: false, // БЕЗ СПИННЕРА!
     },
   },
 
